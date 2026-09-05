@@ -1,0 +1,6 @@
+/target
+
+.env
+*.env
+
+crates/app/config/default.toml

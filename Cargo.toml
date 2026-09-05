@@ -1,0 +1,76 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/shared",
+    "crates/app",
+]
+
+[workspace.dependencies]
+# Async runtime
+tokio          = { version = "1", features = ["full"] }
+tokio-stream   = "0.1"
+
+# Web framework
+axum           = { version = "0.8", features = ["ws", "macros"] }
+tower          = { version = "0.5", features = ["full"] }
+tower-http     = { version = "0.7", features = ["cors", "trace", "compression-gzip"] }
+
+# WebSocket
+tokio-tungstenite = { version = "0.30.0", features = ["rustls-tls-native-roots"] }
+
+# Database clients
+sqlx           = { version = "0.9.0", features = ["runtime-tokio", "tls-rustls", "postgres", "mysql", "sqlite", "uuid", "chrono", "json", "migrate"] }
+mongodb        = "3.9.0"
+redis          = { version = "1.6", features = ["tokio-comp", "connection-manager"] }
+
+# Serialization
+serde          = { version = "1", features = ["derive"] }
+serde_json     = "1"
+
+# Error handling
+thiserror      = "2.0.20"
+anyhow         = "1"
+
+# Validation
+validator      = { version = "0.21", features = ["derive"] }
+
+# Auth / crypto
+jsonwebtoken   = "11"
+argon2         = "0.6"
+aes-gcm        = "0.11.1"
+rand           = "0.10.2"
+uuid           = { version = "1", features = ["v4", "serde"] }
+
+# HTTP client (for AI gateway)
+reqwest        = { version = "0.13.4", features = ["json", "form", "rustls"], default-features = false }
+
+# Observability
+tracing            = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+opentelemetry      = "0.32.0"
+
+# Config
+config     = "0.15"
+dotenvy    = "0.15"
+
+# Time
+chrono = { version = "0.4", features = ["serde"] }
+
+# Misc
+bytes    = "1"
+futures  = "0.3"
+async-trait = "0.1"
+dashmap  = "6"
+
+# SQL parsing (for AI validation)
+sqlparser = "0.62"
+
+[profile.release]
+opt-level     = 3
+lto           = "thin"
+codegen-units = 1
+strip         = "symbols"
+
+[profile.dev]
+opt-level = 0
+debug     = true
