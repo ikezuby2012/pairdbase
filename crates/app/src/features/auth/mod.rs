@@ -30,8 +30,8 @@ pub fn mount(
         .route("/login", post(handler::login))
         .route("/refresh", post(handler::refresh))
         .route("/logout", post(handler::logout))
-        .route("/oauth/:provider", get(handler::oauth_redirect))
-        .route("/oauth/:provider/callback", get(handler::oauth_callback));
+        .route("/oauth/{provider}", get(handler::oauth_redirect))
+        .route("/oauth/{provider}/callback", get(handler::oauth_callback));
 
     (router, uc)
 }

@@ -10,7 +10,6 @@ pub struct AppConfig {
     pub google: OAuthProviderConfig,
     pub github: OAuthProviderConfig,
     pub twitter: OAuthProviderConfig,
-    pub facebook: OAuthProviderConfig,
 }
 
 #[derive(Debug, Deserialize, Clone)]

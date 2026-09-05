@@ -13,10 +13,13 @@ mod state;
 
 use crate::config::AppConfig;
 use crate::db::create_pool;
+use crate::features::auth::oauth;
 use crate::features::auth::repository::{AuthRepo, PgAuthRepo};
 use crate::features::auth::tokens::TokenService;
 use crate::features::auth::use_cases::AuthUseCases;
-use crate::features::auth::oauth;
+
+use crate::features::auth::mount as auth_mount;
+
 use crate::redis::create_client;
 use state::AppState;
 
@@ -59,17 +62,19 @@ async fn main() -> anyhow::Result<()> {
         "OAuth providers registered"
     );
 
-    
+    let (auth_router, auth) = auth_mount(db.clone(), Arc::clone(&token_service));
+
     let state = Arc::new(AppState {
         db,
         redis,
         config: config.clone(),
         auth,
         oauth_providers,
+        auth_repo,
     });
 
     let app = Router::new()
-        .nest("/api/v1", routes::router())
+        .nest("/api/v1", routes::router(auth_router))
         .layer(TraceLayer::new_for_http())
         .layer(CorsLayer::permissive()) // tighten in production
         .with_state(state);
