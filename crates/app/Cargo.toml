@@ -33,14 +33,29 @@ chrono = { workspace = true }
 reqwest = { workspace = true }
 jsonwebtoken = { workspace = true }
 argon2 = { workspace = true }
+aes-gcm = { workspace = true }
+sqlparser = { workspace = true }
 
-rand        = { workspace = true }
-base64      = "0.23.1"
-sha2        = "0.11"
-hex         = "0.4"
+rand = { workspace = true }
+base64 = "0.23.1"
+sha2 = "0.11"
+hex = "0.4"
 urlencoding = "2"
+# bson = "3.1.0"
 
 
 # Cookie handling
-axum-extra  = { version = "0.9", features = ["cookie", "typed-header"] }
-tower-sessions = { version = "0.12", features = ["memory-store"] }
+axum-extra = { version = "0.12", features = ["cookie", "typed-header"] }
+tower-sessions = { version = "0.15", features = ["memory-store"] }
+
+# SQL Server
+tiberius = { version = "0.12", default-features = false, features = [
+    "rustls",
+    "tds73",
+] }
+bb8 = "0.9"
+bb8-tiberius = "0.16"
+tokio-util = { version = "0.7", features = ["compat"] }
+
+# Oracle
+oracle = "0.6"

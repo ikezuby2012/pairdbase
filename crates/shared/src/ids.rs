@@ -24,3 +24,4 @@ id_type!(UserId);
 id_type!(OrgId);
 id_type!(WorkspaceId);
 id_type!(ConnectionId);
+id_type!(QueryHisId);

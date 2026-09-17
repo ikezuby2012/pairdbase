@@ -12,8 +12,8 @@ use axum::{
 };
 use std::sync::Arc;
 
-use crate::db::DbPool;
 use crate::state::AppState;
+use crate::{db::DbPool, features::auth::repository::AuthRepo};
 use repository::PgAuthRepo;
 use tokens::TokenService;
 use use_cases::AuthUseCases;

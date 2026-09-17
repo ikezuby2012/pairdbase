@@ -10,6 +10,7 @@ pub struct AppConfig {
     pub google: OAuthProviderConfig,
     pub github: OAuthProviderConfig,
     pub twitter: OAuthProviderConfig,
+    pub vault: VaultConfig,
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -49,6 +50,11 @@ pub struct AiConfig {
     pub openai_api_key:    Option<String>,
     pub anthropic_api_key: Option<String>,
     pub default_model:     String,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct VaultConfig {
+    pub key: String,
 }
 
 impl AppConfig {
