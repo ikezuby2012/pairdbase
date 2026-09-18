@@ -7,3 +7,4 @@ edition = "2021"
 serde = { workspace = true }
 uuid = { workspace = true }
 thiserror = { workspace = true }
+schemars = { workspace = true }

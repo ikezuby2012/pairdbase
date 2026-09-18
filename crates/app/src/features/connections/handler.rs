@@ -4,8 +4,8 @@ use axum::{
     extract::{Path, State},
     Json,
 };
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use shared::{ConnectionId, OrgId, UserId, WorkspaceId};
 use std::sync::Arc;
 use uuid::Uuid;
 
@@ -23,7 +23,7 @@ use crate::{
 
 // ── Request DTOs ──────────────────────────────────────────────────────────────
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, JsonSchema)]
 pub struct CreateConnectionRequest {
     pub workspace_id: Uuid,
     pub name: String,
@@ -41,7 +41,7 @@ pub struct CreateConnectionRequest {
     pub pool_max: Option<u32>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, JsonSchema)]
 pub struct UpdateConnectionRequest {
     pub name: Option<String>,
     pub read_only: Option<bool>,
@@ -50,7 +50,7 @@ pub struct UpdateConnectionRequest {
     pub pool_max: Option<u32>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, JsonSchema)]
 pub struct TestConnectionRequest {
     pub db_type: String,
     pub host: Option<String>,

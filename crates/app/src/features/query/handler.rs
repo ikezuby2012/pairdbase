@@ -6,6 +6,7 @@ use axum::{
 use serde::Deserialize;
 use std::sync::Arc;
 use uuid::Uuid;
+use schemars::JsonSchema;
 
 use crate::{
     abstractions::ApiResponse, extractors::AuthUser, features::query::error::QueryError, state::{AppState, SharedState},
@@ -15,7 +16,7 @@ use super::domain::ExecuteRequest;
 
 // ── Open session ──────────────────────────────────────────────────────────────
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, JsonSchema)]
 pub struct OpenSessionRequest {
     pub connection_id: Uuid,
     pub workspace_id: Uuid,

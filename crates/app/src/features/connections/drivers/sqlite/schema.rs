@@ -127,7 +127,7 @@ async fn fetch_indexes(
             .collect();
 
         indexes.push(IndexInfo {
-            name: index_name,
+            name: index_name.to_string(),
             unique: is_unique,
             primary: false, // SQLite PKs are implicit rowid, not named indexes
             index_type: "BTREE".into(),

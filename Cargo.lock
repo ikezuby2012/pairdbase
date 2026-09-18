@@ -66,6 +66,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "aide"
+version = "0.16.0-alpha.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "390515b47251185fa076ac92a7a582d9d383b03e13cef0c801e7670cf928229b"
+dependencies = [
+ "axum",
+ "bytes",
+ "cfg-if",
+ "http",
+ "indexmap",
+ "schemars",
+ "serde",
+ "serde_json",
+ "serde_qs",
+ "thiserror 2.0.20",
+ "tower-layer",
+ "tower-service",
+ "tracing",
+]
+
+[[package]]
 name = "allocator-api2"
 version = "0.2.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -91,6 +112,7 @@ name = "app"
 version = "0.1.0"
 dependencies = [
  "aes-gcm",
+ "aide",
  "anyhow",
  "argon2",
  "async-stream",
@@ -112,6 +134,7 @@ dependencies = [
  "rand 0.10.2",
  "redis",
  "reqwest",
+ "schemars",
  "serde",
  "serde_json",
  "sha2 0.11.0",
@@ -1084,6 +1107,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "92773504d58c093f6de2459af4af33faa518c13451eb8f2b5698ed3d36e7c813"
 
 [[package]]
+name = "dyn-clone"
+version = "1.0.20"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d0881ea181b1df73ff77ffaaf9c7544ecc11e82fba9b5f27b262a3c73a332555"
+
+[[package]]
 name = "either"
 version = "1.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1826,6 +1855,8 @@ checksum = "07aa2048142242915a31d35844fb311e0e53fcca590c3a0a40dcf1b841fa09eb"
 dependencies = [
  "equivalent",
  "hashbrown 0.17.1",
+ "serde",
+ "serde_core",
 ]
 
 [[package]]
@@ -2824,6 +2855,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "ref-cast"
+version = "1.0.27"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7e440fb4e4b4147295338efb76001ab9e4efc0e5839df2c47fc5ac2381d365c3"
+dependencies = [
+ "ref-cast-impl",
+]
+
+[[package]]
+name = "ref-cast-impl"
+version = "1.0.27"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "92ecd8964f8453721699a1ed72037b0db49ce2f5a5138486ee89bed6f67cdf3a"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 3.0.4",
+]
+
+[[package]]
 name = "regex-automata"
 version = "0.4.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3098,6 +3149,34 @@ dependencies = [
 ]
 
 [[package]]
+name = "schemars"
+version = "1.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "687274d293b6cdc6e73e0fee520bf2049650090d7164f87672d212a3c530cf4a"
+dependencies = [
+ "chrono",
+ "dyn-clone",
+ "indexmap",
+ "ref-cast",
+ "schemars_derive",
+ "serde",
+ "serde_json",
+ "uuid",
+]
+
+[[package]]
+name = "schemars_derive"
+version = "1.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d98c67716b46af2f0b8cf752abc930f6f9aecfbf671ecfb531db8a31dbe4e2ba"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "serde_derive_internals",
+ "syn 3.0.4",
+]
+
+[[package]]
 name = "scopeguard"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3208,6 +3287,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "serde_derive_internals"
+version = "0.30.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f852137cce035d6a4df67ccce505ff6b3e9fd3a10e3e52b24dc71e650bb1a9bd"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 3.0.4",
+]
+
+[[package]]
 name = "serde_json"
 version = "1.0.151"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3230,6 +3320,19 @@ dependencies = [
  "itoa",
  "serde",
  "serde_core",
+]
+
+[[package]]
+name = "serde_qs"
+version = "1.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "475b9310e272827d34113bf8679b6dfb7fa0023ee049764ba003f8f984e8b5d1"
+dependencies = [
+ "axum",
+ "itoa",
+ "percent-encoding",
+ "ryu",
+ "serde",
 ]
 
 [[package]]
@@ -3338,6 +3441,7 @@ dependencies = [
 name = "shared"
 version = "0.1.0"
 dependencies = [
+ "schemars",
  "serde",
  "thiserror 2.0.20",
  "uuid",

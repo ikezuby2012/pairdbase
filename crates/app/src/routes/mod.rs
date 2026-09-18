@@ -1,13 +1,16 @@
 use crate::state::SharedState;
-use axum::{routing::get, Router};
+use aide::axum::{routing::get, ApiRouter};
 
-pub fn router(auth_router: Router<SharedState>) -> Router<SharedState> {
-    Router::new()
+pub fn router(auth_router: ApiRouter<SharedState>) -> ApiRouter<SharedState> {
+    ApiRouter::new()
         .nest("/auth", auth_router)
         .nest(
             "/workspaces/{workspace_id}/connections",
             crate::features::connections::router(),
         )
-        .nest("/api/v1/query", crate::features::query::router())
-        .route("/ping", get("pairdbase is running".to_string()))
+        .nest("/query", crate::features::query::router())
+        .route(
+            "/ping",
+            get(|| async { "pairdbase is running".to_string() }),
+        )
 }

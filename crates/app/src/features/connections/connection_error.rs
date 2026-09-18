@@ -1,12 +1,14 @@
 use crate::abstractions::ApiResponse;
+use aide::operation::OperationOutput;
 use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
 };
+use schemars::JsonSchema;
 
 // ── Errors ────────────────────────────────────────────────────────────────────
 
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, thiserror::Error, JsonSchema)]
 pub enum ConnectionError {
     #[error("connection not found")]
     NotFound,
@@ -67,4 +69,8 @@ impl IntoResponse for ConnectionError {
 
         (status, ApiResponse::<()>::error((), message, code)).into_response()
     }
+}
+
+impl OperationOutput for ConnectionError {
+    type Inner = Self;
 }

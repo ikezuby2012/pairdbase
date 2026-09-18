@@ -6,6 +6,7 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
+use schemars::JsonSchema;
 
 use crate::{
     abstractions::responses::api_response::ApiResponse,
@@ -18,31 +19,31 @@ use crate::{
     state::AppState,
 };
 
-#[derive(Deserialize)]
+#[derive(Deserialize, JsonSchema)]
 pub struct RegisterRequest {
     pub email: String,
     pub password: String,
     pub display_name: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, JsonSchema)]
 pub struct LoginRequest {
     pub email: String,
     pub password: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, JsonSchema)]
 pub struct RefreshRequest {
     pub refresh_token: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize, JsonSchema)]
 pub struct OAuthCallbackParams {
     pub code: String,
     pub state: String,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, JsonSchema)]
 pub struct OAuthRedirectResponse {
     pub authorization_url: String,
 }

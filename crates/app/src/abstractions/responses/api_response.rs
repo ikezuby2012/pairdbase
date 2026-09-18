@@ -1,11 +1,13 @@
+use aide::operation::OperationOutput;
 use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
     Json,
 };
+use schemars::JsonSchema;
 use serde::Serialize;
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, JsonSchema)]
 pub struct ApiResponse<T>
 where
     T: Serialize,
@@ -66,4 +68,30 @@ where
 
         (status, Json(self)).into_response()
     }
+}
+
+#[derive(Debug, Serialize, JsonSchema)]
+pub struct ApiResponseSchema<T>
+where
+    T: JsonSchema,
+{
+    pub status: String,
+    pub message: String,
+    pub code: u16,
+    pub data: T,
+}
+
+#[derive(Debug, Serialize, JsonSchema)]
+pub struct ApiErrorResponse {
+    pub status: String,
+    pub message: String,
+    pub code: u16,
+    pub data: Option<serde_json::Value>,
+}
+
+impl<T> OperationOutput for ApiResponse<T>
+where
+    T: Serialize,
+{
+    type Inner = Self;
 }

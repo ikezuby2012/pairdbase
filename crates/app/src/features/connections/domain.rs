@@ -1,4 +1,5 @@
 use std::str::FromStr;
+use schemars::JsonSchema;
 
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
@@ -8,7 +9,7 @@ use chrono::{DateTime, Utc};
 
 use crate::features::connections::{connection_error::ConnectionError, vault::Vault};
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum DbType {
     PostgreSQL,
@@ -77,7 +78,7 @@ impl TryFrom<&str> for DbType {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum SslMode {
     Disable,
@@ -123,7 +124,7 @@ impl TryFrom<&str> for SslMode {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, JsonSchema)]
 pub struct Connection {
     pub id: Uuid,
     pub organization_id: Uuid,
@@ -179,7 +180,7 @@ pub struct SshConfig {
     pub private_key: String,   // plaintext PEM in-memory only
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, JsonSchema)] //JsonSchema
 pub struct ConnectionView {
     pub id: ConnectionId,
     pub workspace_id: Uuid,
@@ -271,7 +272,7 @@ pub struct ConnectionRow {
     pub deleted_at: Option<DateTime<Utc>>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, JsonSchema)]
 pub struct TestResult {
     pub success:        bool,
     pub message:        String,

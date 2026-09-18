@@ -2,6 +2,7 @@ use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use mongodb::bson::{doc, Bson, Document};
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 use super::versions::{ServerVersion, VersionCapabilities};
 // use bson::{doc, Bson, Document};
@@ -15,7 +16,7 @@ pub struct ConstraintInfo {
     pub definition: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct ColumnInfo {
     pub name: String,
     pub data_type: String,
@@ -66,7 +67,7 @@ pub struct ForeignKey {
     pub on_update: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct ViewInfo {
     pub schema: String,
     pub name: String,
@@ -75,7 +76,7 @@ pub struct ViewInfo {
     pub columns: Vec<ColumnInfo>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct TriggerInfo {
     pub schema: String,
     pub name: String,
@@ -87,7 +88,7 @@ pub struct TriggerInfo {
     pub language: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct FunctionInfo {
     pub schema: String,
     pub name: String,
@@ -100,7 +101,7 @@ pub struct FunctionInfo {
     pub volatility: Option<String>, // VOLATILE, STABLE, IMMUTABLE (PostgreSQL)
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct ArgumentInfo {
     pub name: Option<String>,
     pub data_type: String,
@@ -108,7 +109,7 @@ pub struct ArgumentInfo {
     pub default: Option<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct ProcedureInfo {
     pub schema: String,
     pub name: String,
@@ -117,7 +118,7 @@ pub struct ProcedureInfo {
     pub definition: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct SequenceInfo {
     pub schema: String,
     pub name: String,
@@ -130,7 +131,7 @@ pub struct SequenceInfo {
     pub last_value: Option<i64>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct ScheduledJobInfo {
     pub name: String,
     pub schema: Option<String>,
@@ -145,7 +146,7 @@ pub struct ScheduledJobInfo {
 
 // ── Materialized Views (PostgreSQL / Oracle) ──────────────────────────────────
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct MaterializedViewInfo {
     pub schema: String,
     pub name: String,
@@ -155,7 +156,7 @@ pub struct MaterializedViewInfo {
     pub columns: Vec<ColumnInfo>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct TypeInfo {
     pub schema: String,
     pub name: String,
@@ -166,7 +167,7 @@ pub struct TypeInfo {
 
 // ── Extensions (PostgreSQL) ───────────────────────────────────────────────────
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct ExtensionInfo {
     pub name: String,
     pub version: String,
@@ -175,7 +176,7 @@ pub struct ExtensionInfo {
 
 // ── Packages (Oracle) ─────────────────────────────────────────────────────────
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct PackageInfo {
     pub schema: String,
     pub name: String,
@@ -210,7 +211,7 @@ pub struct SchemaInfo {
 
 // ── Non-Relational (Mongodb) database schema ──────────────────────────────────────────────────────
 
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, JsonSchema)]
 pub struct MongoDatabaseStats {
     pub collections: Option<i64>,
     pub views: Option<i64>,
@@ -228,7 +229,7 @@ pub struct MongoSchemaInfo {
     pub views: Vec<MongoViewInfo>,
 }
 
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, JsonSchema)]
 pub struct MongoDatabaseInfo {
     pub name: String,
     pub stats: MongoDatabaseStats,

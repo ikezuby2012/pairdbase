@@ -2,8 +2,9 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use shared::{ConnectionId, OrgId, QueryHisId, UserId, WorkspaceId};
 use uuid::Uuid;
+use schemars::JsonSchema;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, JsonSchema)]
 pub struct ExecuteRequest {
     pub connection_id: Uuid,
     pub workspace_id: Uuid,
@@ -193,14 +194,14 @@ impl From<String> for HistoryStatus {
 //     }
 // }
 
-#[derive(Debug, serde::Serialize)]
+#[derive(Debug, serde::Serialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum ConnectionStatus {
     Connected,
     AlreadyConnected,
 }
 
-#[derive(Debug, serde::Serialize)]
+#[derive(Debug, serde::Serialize, JsonSchema)]
 pub struct ConnectResult {
     pub connection_id: Uuid,
     pub status: ConnectionStatus,

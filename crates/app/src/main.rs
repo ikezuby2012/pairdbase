@@ -1,4 +1,5 @@
-use axum::Router;
+use aide::openapi::{Info, OpenApi};
+use axum::{Extension, Json, Router};
 use std::sync::Arc;
 use tower_http::{cors::CorsLayer, trace::TraceLayer};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
@@ -8,6 +9,7 @@ use ::redis::aio::ConnectionManager;
 mod abstractions;
 mod config;
 mod db;
+mod docs;
 mod extractors;
 mod features;
 mod redis;
@@ -49,6 +51,15 @@ async fn main() -> anyhow::Result<()> {
         config.database.min_conns,
     )
     .await?;
+
+    // Build OpenAPI document
+    let mut api = OpenApi {
+        info: Info {
+            title: "PairDBase API".to_string(),
+            ..Info::default()
+        },
+        ..OpenApi::default()
+    };
 
     let jwt_secret = config.auth.jwt_secret.clone();
     let vault_key = config.vault.key.clone();
@@ -114,8 +125,14 @@ async fn main() -> anyhow::Result<()> {
         query: query_case,
     });
 
+    let api_router = routes::router(auth_router).finish_api(&mut api);
+
     let app = Router::new()
-        .nest("/api/v1", routes::router(auth_router))
+        .nest("/api/v1", api_router.into())
+        .route("/api-docs/openapi.json", axum::routing::get(serve_openapi))
+        .route("/docs", axum::routing::get(serve_scalar))
+        // Attach OpenAPI doc to app state
+        .layer(Extension(Arc::new(api)))
         .layer(TraceLayer::new_for_http())
         .layer(CorsLayer::permissive()) // tighten in production
         .with_state(state);
@@ -126,4 +143,35 @@ async fn main() -> anyhow::Result<()> {
 
     axum::serve(listener, app).await?;
     Ok(())
+}
+
+// ── Serve OpenAPI JSON ────────────────────────────────────────────────────────
+
+async fn serve_openapi(Extension(openapi): Extension<Arc<OpenApi>>) -> Json<OpenApi> {
+    Json((*openapi).clone())
+}
+
+// ── Serve Scalar UI ───────────────────────────────────────────────────────────
+
+async fn serve_scalar() -> axum::response::Html<&'static str> {
+    axum::response::Html(
+        r#"
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>QueryForge API</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+    </head>
+    <body>
+        <script
+            id="api-reference"
+            data-url="/api-docs/openapi.json"
+            data-configuration='{"theme":"purple"}'
+        ></script>
+        <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+    </body>
+    </html>
+    "#,
+    )
 }

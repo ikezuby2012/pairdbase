@@ -23,7 +23,9 @@ mongodb = { workspace = true }
 dashmap = { workspace = true }
 futures = { workspace = true }
 redis = { workspace = true }
+
 async-stream = "0.3"
+
 anyhow = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
@@ -35,8 +37,10 @@ jsonwebtoken = { workspace = true }
 argon2 = { workspace = true }
 aes-gcm = { workspace = true }
 sqlparser = { workspace = true }
-
+aide     = { workspace = true }
+schemars = { workspace = true }
 rand = { workspace = true }
+
 base64 = "0.23.1"
 sha2 = "0.11"
 hex = "0.4"

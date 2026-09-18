@@ -1,11 +1,12 @@
-use thiserror::Error;
+use aide::operation::OperationOutput;
 use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
     Json,
 };
+use schemars::JsonSchema;
 
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, thiserror::Error, JsonSchema)]
 pub enum AuthError {
     #[error("invalid credentials")]
     InvalidCredentials,
@@ -72,4 +73,9 @@ impl IntoResponse for AuthApiError {
         };
         (status, Json(serde_json::json!({ "error": msg }))).into_response()
     }
+}
+
+
+impl OperationOutput for AuthApiError {
+    type Inner = Self;
 }

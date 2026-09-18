@@ -4,6 +4,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use shared::ids::{OrgId, UserId};
 use uuid::Uuid;
+use schemars::JsonSchema;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct User {
@@ -89,7 +90,7 @@ pub struct OAuthProfile {
 }
 
 /// Issued tokens returned to the client
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, JsonSchema)]
 pub struct AuthTokens {
     pub access_token: String,
     pub refresh_token: String,
@@ -169,4 +170,12 @@ pub struct TokenResponse {
     pub expires_in: Option<u64>,
     pub refresh_token: Option<String>,
     pub scope: Option<String>,
+}
+
+#[derive(Debug, Serialize, JsonSchema)]
+pub struct AuthTokensResponse {
+    pub access_token:  String,
+    pub refresh_token: String,
+    pub expires_in:    u64,
+    pub token_type:    String,
 }

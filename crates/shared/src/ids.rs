@@ -1,9 +1,10 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use schemars::JsonSchema;
 
 macro_rules! id_type {
     ($name:ident) => {
-        #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+        #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]
         pub struct $name(pub Uuid);
 
         impl $name {

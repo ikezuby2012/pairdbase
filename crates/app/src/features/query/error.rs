@@ -4,6 +4,7 @@ use axum::{
     Json,
 };
 use serde_json::json;
+use aide::operation::OperationOutput;
 
 #[derive(Debug, thiserror::Error)]
 pub enum QueryError {
@@ -100,4 +101,8 @@ impl IntoResponse for QueryError {
         )
             .into_response()
     }
+}
+
+impl OperationOutput for QueryError {
+    type Inner = Self;
 }

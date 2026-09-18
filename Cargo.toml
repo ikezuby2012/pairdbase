@@ -87,6 +87,11 @@ dashmap = "6"
 # SQL parsing (for AI validation)
 sqlparser = "0.62"
 
+
+# OPEN API DOCS
+aide = { version = "0.16.0-alpha.4", features = [ "axum", "axum-json" ] }
+schemars = { version = "1.2.2", features = ["uuid1", "chrono04"] }
+
 [profile.release]
 opt-level = 3
 lto = "thin"

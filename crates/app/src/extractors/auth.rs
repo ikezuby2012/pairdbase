@@ -9,12 +9,12 @@ use axum_extra::{
     TypedHeader,
 };
 use uuid::Uuid;
+use schemars::JsonSchema;
 
-use crate::features::auth::tokens::TokenService;
 use crate::state::AppState;
 use std::sync::Arc;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, JsonSchema)]
 pub struct AuthUser {
     pub user_id: Uuid,
     pub org_id:  Uuid,
@@ -81,3 +81,5 @@ impl IntoResponse for AuthRejection {
         .into_response()
     }
 }
+
+impl aide::OperationInput for AuthUser {}
