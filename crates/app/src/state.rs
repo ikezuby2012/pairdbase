@@ -8,6 +8,7 @@ use crate::features::auth::tokens::TokenService;
 use crate::features::auth::use_cases::AuthUseCases;
 use crate::features::connections::use_cases::ConnectionUseCases;
 use crate::features::query::use_case::QueryUseCases;
+use crate::features::workspace::use_case::WorkspaceUseCases;
 use crate::redis::RedisClient;
 
 pub struct AppState {
@@ -22,6 +23,7 @@ pub struct AppState {
 
     pub connections: Arc<ConnectionUseCases>,
     pub query: Arc<QueryUseCases>,
+    pub workspaces: Arc<WorkspaceUseCases>,
 }
 
 pub type SharedState = Arc<AppState>;

@@ -31,7 +31,9 @@ use crate::features::connections::vault::Vault;
 use crate::features::query::repository::PgQueryRepo;
 use crate::features::query::use_case::QueryUseCases;
 use crate::features::query::{pool::ExecutionPoolRegistry, session::SessionRegistry};
-
+use crate::features::{
+    workspace::repository::PgWorkspaceRepo, workspace::use_case::WorkspaceUseCases,
+};
 use crate::redis::create_client;
 use state::AppState;
 
@@ -56,6 +58,8 @@ async fn main() -> anyhow::Result<()> {
     let mut api = OpenApi {
         info: Info {
             title: "PairDBase API".to_string(),
+            version: "1.0.0".to_string(),
+            description: Some("PairDBase collaborative database platform API".to_string()),
             ..Info::default()
         },
         ..OpenApi::default()
@@ -113,6 +117,9 @@ async fn main() -> anyhow::Result<()> {
         connections.clone(),
     ));
 
+    let workspace_repo = Arc::new(PgWorkspaceRepo::new(db.clone()));
+    let workspaces = Arc::new(WorkspaceUseCases::new(workspace_repo));
+
     let state = Arc::new(AppState {
         db,
         redis,
@@ -123,6 +130,7 @@ async fn main() -> anyhow::Result<()> {
         token_service,
         connections,
         query: query_case,
+        workspaces,
     });
 
     let api_router = routes::router(auth_router).finish_api(&mut api);

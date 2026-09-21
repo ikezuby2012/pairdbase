@@ -1,10 +1,10 @@
+use aide::operation::OperationOutput;
 use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
     Json,
 };
 use serde_json::json;
-use aide::operation::OperationOutput;
 
 #[derive(Debug, thiserror::Error)]
 pub enum QueryError {
@@ -36,73 +36,60 @@ pub enum QueryError {
     Internal(String),
 }
 
-impl IntoResponse for QueryError {
-    fn into_response(self) -> Response {
-        let (status, message, code) = match &self {
-            QueryError::NotConnected => (
-                StatusCode::BAD_REQUEST,
-                self.to_string(),
-                "QUERY_NOT_CONNECTED",
-            ),
+shared::impl_api_error! {
+    QueryError {
+        QueryError::NotConnected => (
+            StatusCode::BAD_REQUEST,
+            "QUERY_NOT_CONNECTED",
+            "not connected".to_string()
+        ),
 
-            QueryError::SessionExpired => (
-                StatusCode::UNAUTHORIZED,
-                self.to_string(),
-                "QUERY_SESSION_EXPIRED",
-            ),
+        QueryError::SessionExpired => (
+            StatusCode::UNAUTHORIZED,
+            "QUERY_SESSION_EXPIRED",
+            "query session expired".to_string()
+        ),
 
-            QueryError::NoSession => (
-                StatusCode::UNAUTHORIZED,
-                self.to_string(),
-                "QUERY_NO_SESSION",
-            ),
+        QueryError::NoSession => (
+            StatusCode::UNAUTHORIZED,
+            "QUERY_NO_SESSION",
+            "no active query session".to_string()
+        ),
 
-            QueryError::Rejected(_) => (StatusCode::FORBIDDEN, self.to_string(), "QUERY_REJECTED"),
+        QueryError::Rejected(message) => (
+            StatusCode::FORBIDDEN,
+            "QUERY_REJECTED",
+            format!("query rejected: {message}")
+        ),
 
-            QueryError::ExecutionFailed(_) => (
-                StatusCode::UNPROCESSABLE_ENTITY,
-                self.to_string(),
-                "QUERY_EXECUTION_FAILED",
-            ),
+        QueryError::ExecutionFailed(message) => (
+            StatusCode::UNPROCESSABLE_ENTITY,
+            "QUERY_EXECUTION_FAILED",
+            format!("query execution failed: {message}")
+        ),
 
-            QueryError::Timeout(_) => (
-                StatusCode::REQUEST_TIMEOUT,
-                self.to_string(),
-                "QUERY_TIMEOUT",
-            ),
+        QueryError::Timeout(message) => (
+            StatusCode::REQUEST_TIMEOUT,
+            "QUERY_TIMEOUT",
+            format!("query timed out: {message}")
+        ),
 
-            QueryError::PermissionError(_) => (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "permission lookup failed".to_string(),
-                "QUERY_PERMISSION_ERROR",
-            ),
+        QueryError::PermissionError(_) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "QUERY_PERMISSION_ERROR",
+            "permission lookup failed".to_string()
+        ),
 
-            QueryError::ConnectionNotFound => (
-                StatusCode::NOT_FOUND,
-                self.to_string(),
-                "CONNECTION_NOT_FOUND",
-            ),
+        QueryError::ConnectionNotFound => (
+            StatusCode::NOT_FOUND,
+            "CONNECTION_NOT_FOUND",
+            "connection not found".to_string()
+        ),
 
-            QueryError::Internal(_) => (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "internal error".to_string(),
-                "INTERNAL_ERROR",
-            ),
-        };
-
-        (
-            status,
-            Json(json!({
-                "status": "error",
-                "message": message,
-                "code": code,
-                "data": null
-            })),
-        )
-            .into_response()
+        QueryError::Internal(_) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "INTERNAL_ERROR",
+            "internal error".to_string()
+        ),
     }
-}
-
-impl OperationOutput for QueryError {
-    type Inner = Self;
 }

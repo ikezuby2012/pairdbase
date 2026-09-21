@@ -6,13 +6,6 @@ use aide::{
     transform::TransformOperation,
 };
 
-use axum::{
-    routing::{delete, get, post},
-    Json, Router,
-};
-
-use crate::abstractions::responses::{ApiErrorResponse, ApiResponseSchema};
-
 pub mod domain;
 pub mod error;
 pub mod executor;
@@ -22,8 +15,6 @@ pub mod pool;
 pub mod repository;
 pub mod session;
 pub mod use_case;
-
-use domain::ConnectResult;
 
 use crate::state::SharedState;
 

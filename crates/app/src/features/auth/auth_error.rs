@@ -61,21 +61,42 @@ impl From<AuthError> for AuthApiError {
     }
 }
 
-impl IntoResponse for AuthApiError {
-    fn into_response(self) -> Response {
-        let (status, msg) = match &self {
-            AuthApiError::InvalidCredentials => (StatusCode::UNAUTHORIZED, self.to_string()),
-            AuthApiError::EmailTaken         => (StatusCode::CONFLICT, self.to_string()),
-            AuthApiError::InvalidToken       => (StatusCode::UNAUTHORIZED, self.to_string()),
-            AuthApiError::UnsupportedProvider => (StatusCode::BAD_REQUEST, self.to_string()),
-            AuthApiError::InvalidState        => (StatusCode::BAD_REQUEST, self.to_string()),
-            AuthApiError::Internal(_)         => (StatusCode::INTERNAL_SERVER_ERROR, "internal server error".to_string()),
-        };
-        (status, Json(serde_json::json!({ "error": msg }))).into_response()
+shared::impl_api_error! {
+    AuthApiError {
+        AuthApiError::InvalidCredentials => (
+            StatusCode::UNAUTHORIZED,
+            "AUTH_INVALID_CREDENTIALS",
+            "invalid credentials".to_string()
+        ),
+
+        AuthApiError::EmailTaken => (
+            StatusCode::CONFLICT,
+            "AUTH_EMAIL_TAKEN",
+            "email is already registered".to_string()
+        ),
+
+        AuthApiError::InvalidToken => (
+            StatusCode::UNAUTHORIZED,
+            "AUTH_INVALID_TOKEN",
+            "invalid token".to_string()
+        ),
+
+        AuthApiError::UnsupportedProvider => (
+            StatusCode::BAD_REQUEST,
+            "AUTH_UNSUPPORTED_PROVIDER",
+            "unsupported authentication provider".to_string()
+        ),
+
+        AuthApiError::InvalidState => (
+            StatusCode::BAD_REQUEST,
+            "AUTH_INVALID_STATE",
+            "invalid authentication state".to_string()
+        ),
+
+        AuthApiError::Internal(_) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "INTERNAL_ERROR",
+            "internal server error".to_string()
+        ),
     }
-}
-
-
-impl OperationOutput for AuthApiError {
-    type Inner = Self;
 }

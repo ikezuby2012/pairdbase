@@ -4,6 +4,7 @@ use aide::axum::{routing::get, ApiRouter};
 pub fn router(auth_router: ApiRouter<SharedState>) -> ApiRouter<SharedState> {
     ApiRouter::new()
         .nest("/auth", auth_router)
+        .nest("/workspaces", crate::features::workspace::router())
         .nest(
             "/workspaces/{workspace_id}/connections",
             crate::features::connections::router(),
