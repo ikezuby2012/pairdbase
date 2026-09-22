@@ -14,6 +14,7 @@ mod extractors;
 mod features;
 mod redis;
 mod routes;
+mod services;
 mod state;
 
 use crate::config::AppConfig;
@@ -26,6 +27,8 @@ use crate::features::auth::use_cases::AuthUseCases;
 use crate::features::connections::pool::DriverRegistry;
 use crate::features::connections::pool::SchemaCache;
 use crate::features::connections::repository::PgConnectionRepo;
+use crate::features::organization::repository::PgOrganizationRepo;
+use crate::features::organization::use_case::OrgUseCases;
 use crate::features::connections::use_cases::ConnectionUseCases;
 use crate::features::connections::vault::Vault;
 use crate::features::query::repository::PgQueryRepo;
@@ -120,6 +123,9 @@ async fn main() -> anyhow::Result<()> {
     let workspace_repo = Arc::new(PgWorkspaceRepo::new(db.clone()));
     let workspaces = Arc::new(WorkspaceUseCases::new(workspace_repo));
 
+    let org_repo = Arc::new(PgOrganizationRepo::new(db.clone()));
+    let org =  Arc::new(OrgUseCases::new(org_repo));
+
     let state = Arc::new(AppState {
         db,
         redis,
@@ -131,6 +137,7 @@ async fn main() -> anyhow::Result<()> {
         connections,
         query: query_case,
         workspaces,
+        organization: org
     });
 
     let api_router = routes::router(auth_router).finish_api(&mut api);

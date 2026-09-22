@@ -9,8 +9,6 @@ use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use uuid::Uuid;
 
-use crate::extractors;
-
 use crate::{
     extractors::AuthUser,
     features::connections::{

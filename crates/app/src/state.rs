@@ -9,6 +9,7 @@ use crate::features::auth::use_cases::AuthUseCases;
 use crate::features::connections::use_cases::ConnectionUseCases;
 use crate::features::query::use_case::QueryUseCases;
 use crate::features::workspace::use_case::WorkspaceUseCases;
+use crate::features::organization::use_case::OrgUseCases;
 use crate::redis::RedisClient;
 
 pub struct AppState {
@@ -24,6 +25,7 @@ pub struct AppState {
     pub connections: Arc<ConnectionUseCases>,
     pub query: Arc<QueryUseCases>,
     pub workspaces: Arc<WorkspaceUseCases>,
+    pub organization: Arc<OrgUseCases>
 }
 
 pub type SharedState = Arc<AppState>;

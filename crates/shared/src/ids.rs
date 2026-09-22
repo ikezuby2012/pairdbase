@@ -27,3 +27,5 @@ id_type!(WorkspaceId);
 id_type!(ConnectionId);
 id_type!(QueryHisId);
 id_type!(WorkspaceMemberId);
+id_type!(OrgMemberId);
+id_type!(OrgInviteId);

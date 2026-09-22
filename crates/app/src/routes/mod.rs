@@ -9,6 +9,7 @@ pub fn router(auth_router: ApiRouter<SharedState>) -> ApiRouter<SharedState> {
             "/workspaces/{workspace_id}/connections",
             crate::features::connections::router(),
         )
+        .nest("/organization", crate::features::organization::router())
         .nest("/query", crate::features::query::router())
         .route(
             "/ping",
