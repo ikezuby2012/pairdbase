@@ -27,10 +27,10 @@ use crate::features::auth::use_cases::AuthUseCases;
 use crate::features::connections::pool::DriverRegistry;
 use crate::features::connections::pool::SchemaCache;
 use crate::features::connections::repository::PgConnectionRepo;
-use crate::features::organization::repository::PgOrganizationRepo;
-use crate::features::organization::use_case::OrgUseCases;
 use crate::features::connections::use_cases::ConnectionUseCases;
 use crate::features::connections::vault::Vault;
+use crate::features::organization::repository::PgOrganizationRepo;
+use crate::features::organization::use_case::OrgUseCases;
 use crate::features::query::repository::PgQueryRepo;
 use crate::features::query::use_case::QueryUseCases;
 use crate::features::query::{pool::ExecutionPoolRegistry, session::SessionRegistry};
@@ -38,6 +38,10 @@ use crate::features::{
     workspace::repository::PgWorkspaceRepo, workspace::use_case::WorkspaceUseCases,
 };
 use crate::redis::create_client;
+use crate::services::{
+    email::EmailService,
+    outbox::{OutboxPublisher, OutboxWorker},
+};
 use state::AppState;
 
 #[tokio::main]
@@ -124,10 +128,14 @@ async fn main() -> anyhow::Result<()> {
     let workspaces = Arc::new(WorkspaceUseCases::new(workspace_repo));
 
     let org_repo = Arc::new(PgOrganizationRepo::new(db.clone()));
-    let org =  Arc::new(OrgUseCases::new(org_repo));
+    let org = Arc::new(OrgUseCases::new(org_repo));
+
+    let email_service = Arc::new(EmailService::new(config.email.clone())?);
+
+    let outbox = OutboxPublisher::new(db.clone());
 
     let state = Arc::new(AppState {
-        db,
+        db: db.clone(),
         redis,
         config: config.clone(),
         auth,
@@ -137,7 +145,9 @@ async fn main() -> anyhow::Result<()> {
         connections,
         query: query_case,
         workspaces,
-        organization: org
+        organization: org,
+        email: email_service.clone(),
+        outbox,
     });
 
     let api_router = routes::router(auth_router).finish_api(&mut api);
@@ -157,6 +167,13 @@ async fn main() -> anyhow::Result<()> {
     tracing::info!("API server listening on {addr}");
 
     axum::serve(listener, app).await?;
+
+    let worker = Arc::new(OutboxWorker::new(db.clone(), email_service));
+
+    worker.start();
+
+    tracing::info!("outbox worker started");
+
     Ok(())
 }
 
@@ -174,7 +191,7 @@ async fn serve_scalar() -> axum::response::Html<&'static str> {
     <!DOCTYPE html>
     <html>
     <head>
-        <title>QueryForge API</title>
+        <title>Pairdbase API</title>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
     </head>

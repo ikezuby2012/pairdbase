@@ -1,17 +1,19 @@
 use async_trait::async_trait;
-use std::sync::Arc;
+use shared::WorkspaceId;
 use uuid::Uuid;
 
 use crate::db::DbPool;
 
 use super::domain::{
     MemberRole, Workspace, WorkspaceMember, WorkspaceMemberWithUser, WorkspaceMemberWithUserRow,
-    WorkspaceRow, WorkspaceView,
+    WorkspaceRow, WorkspaceView, WorkspaceWithOrganization, WorkspaceWithOrganizationRow
 };
 use super::error::WorkspaceError;
 
 #[async_trait]
 pub trait WorkspaceRepo: Send + Sync {
+    async fn begin(&self) -> Result<sqlx::Transaction<'_, sqlx::Postgres>, WorkspaceError>;
+
     async fn find_by_id(&self, id: Uuid) -> Result<Option<Workspace>, WorkspaceError>;
 
     async fn list_for_user(
@@ -37,6 +39,16 @@ pub trait WorkspaceRepo: Send + Sync {
         &self,
         workspace_id: Uuid,
     ) -> Result<Vec<WorkspaceMemberWithUser>, WorkspaceError>;
+
+    async fn get_member(
+        &self,
+        user_id: Uuid,
+    ) -> Result<Option<WorkspaceMemberWithUser>, WorkspaceError>;
+
+    async fn get_with_organization(
+        &self,
+        workspace_id: WorkspaceId,
+    ) -> Result<Option<WorkspaceWithOrganization>, WorkspaceError>;
 
     async fn find_user_by_email(
         &self,
@@ -76,6 +88,13 @@ impl PgWorkspaceRepo {
 
 #[async_trait]
 impl WorkspaceRepo for PgWorkspaceRepo {
+    async fn begin(&self) -> Result<sqlx::Transaction<'_, sqlx::Postgres>, WorkspaceError> {
+        self.pool
+            .begin()
+            .await
+            .map_err(|e| WorkspaceError::Internal(e.to_string()))
+    }
+
     async fn find_by_id(&self, id: Uuid) -> Result<Option<Workspace>, WorkspaceError> {
         let row = sqlx::query_as::<_, WorkspaceRow>(
             r#"
@@ -369,6 +388,93 @@ impl WorkspaceRepo for PgWorkspaceRepo {
             .collect::<Result<Vec<_>, WorkspaceError>>()?;
 
         Ok(members)
+    }
+
+    async fn get_member(
+        &self,
+        user_id: Uuid,
+    ) -> Result<Option<WorkspaceMemberWithUser>, WorkspaceError> {
+        let row = sqlx::query_as::<_, WorkspaceMemberWithUserRow>(
+            r#"
+            SELECT
+                wm.id AS member_id,
+                wm.workspace_id,
+                wm.user_id,
+                wm.role,
+                wm.joined_at,
+                wm.created_by AS created_by,
+                wm.created_at AS created_at,
+                wm.updated_by AS updated_by,
+                wm.updated_at AS updated_at,
+                wm.is_soft_deleted AS is_soft_deleted,
+                wm.deleted_by AS deleted_by,
+                wm.deleted_at AS deleted_at,
+
+                u.email AS user_email,
+                u.display_name AS user_display_name,
+                u.avatar_url AS user_avatar_url
+            FROM TBL_WORKSPACE_MEMBERS wm
+            INNER JOIN TBL_USERS u
+                ON u.id = wm.user_id
+            WHERE wm.user_id = $1
+              AND wm.is_soft_deleted = FALSE
+              AND wm.deleted_at IS NULL
+            "#,
+        )
+        .bind(user_id)
+        .fetch_optional(&self.pool)
+        .await
+        .map_err(|e| WorkspaceError::Internal(e.to_string()))?;
+
+        let member = row.map(WorkspaceMemberWithUser::try_from).transpose()?;
+
+        Ok(member)
+    }
+
+    async fn get_with_organization(
+        &self,
+        workspace_id: WorkspaceId,
+    ) -> Result<Option<WorkspaceWithOrganization>, WorkspaceError> {
+        let row = sqlx::query_as::<_, WorkspaceWithOrganizationRow>(
+            r#"
+        SELECT
+            w.id AS workspace_id,
+            w.organization_id AS organization_id,
+            w.name AS workspace_name,
+            w.description AS workspace_description,
+            w.color AS workspace_color,
+            w.created_by AS workspace_created_by,
+            w.created_at AS workspace_created_at,
+            w.updated_by AS workspace_updated_by,
+            w.updated_at AS workspace_updated_at,
+
+            o.name AS organization_name,
+            o.created_by AS organization_created_by
+
+        FROM TBL_WORKSPACES w
+
+        INNER JOIN TBL_ORGANIZATIONS o
+            ON o.id = w.organization_id
+
+        WHERE w.id = $1
+          AND w.is_soft_deleted = FALSE
+          AND w.deleted_at IS NULL
+        "#,
+        )
+        .bind(workspace_id.0)
+        .fetch_optional(&self.pool)
+        .await
+        .map_err(|e| {
+            tracing::error!(
+                error = ?e,
+                workspace_id = %workspace_id.0,
+                "Failed to fetch workspace with organization"
+            );
+
+            WorkspaceError::Internal(e.to_string())
+        })?;
+
+        Ok(row.map(WorkspaceWithOrganization::from))
     }
 
     async fn find_user_by_email(

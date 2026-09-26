@@ -1,4 +1,4 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct AppConfig {
@@ -11,6 +11,7 @@ pub struct AppConfig {
     pub github: OAuthProviderConfig,
     pub twitter: OAuthProviderConfig,
     pub vault: VaultConfig,
+    pub email: EmailConfig,
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -56,6 +57,37 @@ pub struct AiConfig {
 pub struct VaultConfig {
     pub key: String,
 }
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum EmailProviderKind {
+    Smtp,
+    Resend,
+    #[serde(rename = "sendgrid")]
+    SendGrid,
+    Console,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct EmailConfig {
+    pub provider: EmailProviderKind,
+    pub from_email: String,
+    pub from_name: String,
+    pub base_url: String,
+
+    // SMTP
+    pub smtp_host: Option<String>,
+    pub smtp_port: Option<u16>,
+    pub smtp_username: Option<String>,
+    pub smtp_password: Option<String>,
+
+    // Resend
+    pub resend_api_key: Option<String>,
+
+    // SendGrid
+    pub sendgrid_api_key: Option<String>,
+}
+
 
 impl AppConfig {
     pub fn load() -> anyhow::Result<Self> {

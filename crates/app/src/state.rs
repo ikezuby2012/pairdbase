@@ -11,6 +11,8 @@ use crate::features::query::use_case::QueryUseCases;
 use crate::features::workspace::use_case::WorkspaceUseCases;
 use crate::features::organization::use_case::OrgUseCases;
 use crate::redis::RedisClient;
+use crate::services::email::EmailService;
+use crate::services::outbox::OutboxPublisher;
 
 pub struct AppState {
     pub db: DbPool,
@@ -25,7 +27,9 @@ pub struct AppState {
     pub connections: Arc<ConnectionUseCases>,
     pub query: Arc<QueryUseCases>,
     pub workspaces: Arc<WorkspaceUseCases>,
-    pub organization: Arc<OrgUseCases>
+    pub organization: Arc<OrgUseCases>,
+    pub email: Arc<EmailService>,
+    pub outbox: OutboxPublisher,
 }
 
 pub type SharedState = Arc<AppState>;

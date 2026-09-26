@@ -1,11 +1,11 @@
-pub mod provider;
+pub mod discord;
 pub mod github;
 pub mod google;
+pub mod provider;
 pub mod twitter;
 
-use std::{collections::HashMap, sync::Arc};
 use provider::OAuthProviderClient;
-use crate::features::auth::domains::OAuthProvider;
+use std::{collections::HashMap, sync::Arc};
 
 pub type ProviderRegistry = HashMap<String, Arc<dyn OAuthProviderClient>>;
 pub fn build_registry(base_redirect_uri: &str) -> ProviderRegistry {
@@ -19,22 +19,24 @@ pub fn build_registry(base_redirect_uri: &str) -> ProviderRegistry {
 
             if let (Some(id), Some(secret)) = (client_id, client_secret) {
                 let config = OAuthConfig {
-                    client_id:     id,
+                    client_id: id,
                     client_secret: secret,
-                    redirect_uri:  format!("{}/auth/callback/{}", base_redirect_uri, $slug),
+                    redirect_uri: format!("{}/auth/callback/{}", base_redirect_uri, $slug),
                 };
                 map.insert($slug.to_string(), Arc::new($provider::new(config)));
             }
         };
     }
 
-    use google::GoogleProvider;
+    use discord::DiscordProvider;
     use github::GitHubProvider;
+    use google::GoogleProvider;
     use twitter::TwitterProvider;
 
-    register!(GoogleProvider,   "GOOGLE",   "google");
-    register!(GitHubProvider,   "GITHUB",   "github");
-    register!(TwitterProvider,  "TWITTER",  "twitter");
+    register!(GoogleProvider, "GOOGLE", "google");
+    register!(GitHubProvider, "GITHUB", "github");
+    register!(TwitterProvider, "TWITTER", "twitter");
+    register!(DiscordProvider, "DISCORD", "discord");
 
     map
 }

@@ -11,6 +11,7 @@ use super::error::OrgError;
 
 #[async_trait]
 pub trait OrgRepo: Send + Sync {
+    async fn begin(&self) -> Result<sqlx::Transaction<'_, sqlx::Postgres>, OrgError>;
     // Organization
     async fn find_by_id(&self, id: Uuid) -> Result<Option<Organization>, OrgError>;
     async fn find_by_slug(&self, slug: &str) -> Result<Option<Organization>, OrgError>;
@@ -42,6 +43,8 @@ pub trait OrgRepo: Send + Sync {
     ) -> Result<(), OrgError>;
 
     async fn remove_member(&self, org_id: Uuid, user_id: Uuid) -> Result<(), OrgError>;
+
+    async fn find_member(&self, org_id: Uuid, requester_id: Uuid) -> Result<OrgMember, OrgError>;
 
     // Invitations
     async fn create_invitation(
@@ -91,6 +94,13 @@ impl PgOrganizationRepo {
 
 #[async_trait]
 impl OrgRepo for PgOrganizationRepo {
+    async fn begin(&self) -> Result<sqlx::Transaction<'_, sqlx::Postgres>, OrgError> {
+        self.pool
+            .begin()
+            .await
+            .map_err(|e| OrgError::Internal(e.to_string()))
+    }
+
     async fn find_by_id(&self, id: Uuid) -> Result<Option<Organization>, OrgError> {
         let row = sqlx::query_as::<_, OrganizationRow>(
             r#"
@@ -418,6 +428,52 @@ impl OrgRepo for PgOrganizationRepo {
         }
 
         Ok(())
+    }
+
+    async fn find_member(&self, org_id: Uuid, requester_id: Uuid) -> Result<OrgMember, OrgError> {
+        let row = sqlx::query_as!(
+            OrgMemberWithUserView,
+            r#"
+        SELECT
+            om.id,
+            om.org_id,
+            om.user_id,
+            om.role,
+            om.joined_at,
+            u.email,
+            u.display_name,
+            u.avatar_url,
+            om.created_by,
+            om.created_at,
+            om.updated_by,
+            om.updated_at
+        FROM tbl_organization_members om
+        INNER JOIN tbl_users u
+            ON u.id = om.user_id
+        WHERE om.org_id = $1
+          AND om.user_id = $2
+          AND om.is_soft_deleted = FALSE
+        LIMIT 1
+        "#,
+            org_id,
+            requester_id
+        )
+        .fetch_optional(&self.pool)
+        .await
+        .map_err(|e| {
+            tracing::error!(
+                error = ?e,
+                org_id = %org_id,
+                requester_id = %requester_id,
+                "Failed to find organization member"
+            );
+
+            OrgError::Internal(e.to_string())
+        })?;
+
+        let row = row.ok_or(OrgError::NotFound)?;
+
+        OrgMember::try_from(row)
     }
 
     async fn remove_member(&self, org_id: Uuid, user_id: Uuid) -> Result<(), OrgError> {

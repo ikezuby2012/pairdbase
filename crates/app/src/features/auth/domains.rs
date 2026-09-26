@@ -45,6 +45,7 @@ pub enum OAuthProvider {
     Google,
     GitHub,
     Twitter,
+    Discord
 }
 
 impl OAuthProvider {
@@ -53,6 +54,7 @@ impl OAuthProvider {
             OAuthProvider::Google => "google",
             OAuthProvider::GitHub => "github",
             OAuthProvider::Twitter => "twitter",
+            OAuthProvider::Discord => "discord",
             // OAuthProvider::Facebook => "facebook",
         }
     }
@@ -65,6 +67,7 @@ impl TryFrom<&str> for OAuthProvider {
             "google" => Ok(OAuthProvider::Google),
             "github" => Ok(OAuthProvider::GitHub),
             "twitter" => Ok(OAuthProvider::Twitter),
+            "discord" => Ok(OAuthProvider::Discord),
             // "facebook" => Ok(OAuthProvider::Facebook),
             other => Err(AuthError::UnsupportedProvider(other.to_string())),
         }

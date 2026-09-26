@@ -123,6 +123,66 @@ pub struct WorkspaceMemberWithUserRow {
     pub user_organization_id: Uuid,
 }
 
+#[derive(Debug, Clone)]
+pub struct WorkspaceWithOrganization {
+    pub id: WorkspaceId,
+    pub organization_id: OrgId,
+    pub name: String,
+    pub description: Option<String>,
+    pub color: Option<String>,
+    pub created_by: Uuid,
+    pub created_at: DateTime<Utc>,
+    pub updated_by: Option<Uuid>,
+    pub updated_at: Option<DateTime<Utc>>,
+
+    pub organization: WorkspaceOrganization,
+}
+
+#[derive(Debug, Clone, FromRow)]
+pub struct WorkspaceWithOrganizationRow {
+    pub workspace_id: Uuid,
+    pub organization_id: Uuid,
+    pub workspace_name: String,
+    pub workspace_description: Option<String>,
+    pub workspace_color: Option<String>,
+    pub workspace_created_by: Uuid,
+    pub workspace_created_at: DateTime<Utc>,
+    pub workspace_updated_by: Option<Uuid>,
+    pub workspace_updated_at: Option<DateTime<Utc>>,
+
+    pub organization_name: String,
+    pub organization_created_by: Uuid,
+}
+
+impl From<WorkspaceWithOrganizationRow> for WorkspaceWithOrganization {
+    fn from(row: WorkspaceWithOrganizationRow) -> Self {
+        Self {
+            id: WorkspaceId(row.workspace_id),
+            organization_id: OrgId(row.organization_id),
+            name: row.workspace_name,
+            description: row.workspace_description,
+            color: row.workspace_color,
+            created_by: row.workspace_created_by,
+            created_at: row.workspace_created_at,
+            updated_by: row.workspace_updated_by,
+            updated_at: row.workspace_updated_at,
+
+            organization: WorkspaceOrganization {
+                id: OrgId(row.organization_id),
+                name: row.organization_name,
+                created_by: row.organization_created_by,
+            },
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct WorkspaceOrganization {
+    pub id: OrgId,
+    pub name: String,
+    pub created_by: Uuid,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum MemberRole {

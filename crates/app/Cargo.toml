@@ -37,7 +37,7 @@ jsonwebtoken = { workspace = true }
 argon2 = { workspace = true }
 aes-gcm = { workspace = true }
 sqlparser = { workspace = true }
-aide     = { workspace = true }
+aide = { workspace = true }
 schemars = { workspace = true }
 rand = { workspace = true }
 
@@ -63,3 +63,5 @@ tokio-util = { version = "0.7", features = ["compat"] }
 
 # Oracle
 oracle = "0.6"
+
+lettre = { workspace = true }

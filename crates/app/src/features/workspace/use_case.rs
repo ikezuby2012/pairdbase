@@ -12,6 +12,7 @@ use super::{
     error::WorkspaceError,
     repository::WorkspaceRepo,
 };
+use crate::services::outbox::{events::OutboxEvent, OutboxPublisher};
 
 pub struct WorkspaceUseCases {
     repo: Arc<dyn WorkspaceRepo>,
@@ -223,9 +224,38 @@ impl WorkspaceUseCases {
             return Err(WorkspaceError::AlreadyMember);
         }
 
+        let mut tx = self.repo.begin().await?;
+
         self.repo
             .add_member(workspace_id, invite_user_id, &role, requester_id)
             .await?;
+
+        let invitee = self.repo.get_member(requester_id).await?.unwrap();
+
+        let org_workspace_info = self
+            .repo
+            .get_with_organization(shared::WorkspaceId(workspace_id))
+            .await?
+            .ok_or_else(|| WorkspaceError::NotFound)?;
+
+        OutboxPublisher::publish_in_tx(
+            &OutboxEvent::EmailWorkspaceInvitation {
+                to: req.email.clone(),
+                display_name: req.email.clone(),
+                inviter_name: invitee.user.display_name.clone(),
+                org_name: org_workspace_info.name.clone(),
+                workspace_name: org_workspace_info.organization.name.clone(),
+                role: role.as_str().to_string(),
+                workspace_id,
+            },
+            &mut tx,
+        )
+        .await
+        .map_err(|e| WorkspaceError::Internal(e.to_string()))?;
+
+        tx.commit()
+            .await
+            .map_err(|e| WorkspaceError::Internal(e.to_string()))?;
 
         // Return updated member list entry
         let members = self.repo.list_members(workspace_id).await?;

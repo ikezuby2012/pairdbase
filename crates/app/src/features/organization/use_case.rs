@@ -9,6 +9,8 @@ use super::dto::*;
 use super::error::OrgError;
 use super::repository::OrgRepo;
 
+use crate::services::outbox::{events::OutboxEvent, OutboxPublisher};
+
 pub struct OrgUseCases {
     repo: Arc<dyn OrgRepo>,
 }
@@ -254,10 +256,35 @@ impl OrgUseCases {
         // Generate secure invitation token
         let token = generate_invite_token();
 
+        let mut tx = self.repo.begin().await?;
+
         let invitation = self
             .repo
             .create_invitation(org_id, &req.email, &role, requester_id, &token)
             .await?;
+
+        let inviter = self.repo.find_member(org_id, requester_id).await?;
+        let org = self
+            .repo
+            .find_by_id(org_id)
+            .await?
+            .ok_or(OrgError::NotFound)?;
+
+        // TODO: send invitation email with token link
+        // email_service.send_invitation(&invitation).await?;
+
+        OutboxPublisher::publish_in_tx(
+            &OutboxEvent::EmailOrgInvitation {
+                to: req.email.clone(),
+                inviter_name: inviter.display_name.clone(),
+                org_name: org.name.clone(),
+                role: invitation.role.as_str().to_string(),
+                token,
+            },
+            &mut tx,
+        )
+        .await
+        .map_err(|e| OrgError::Internal(e.to_string()))?;
 
         // self.audit(AuditEvent::member_invited(
         //     org_id,
@@ -267,8 +294,9 @@ impl OrgUseCases {
         // ))
         // .await;
 
-        // TODO: send invitation email with token link
-        // email_service.send_invitation(&invitation).await?;
+        tx.commit()
+            .await
+            .map_err(|e| OrgError::Internal(e.to_string()))?;
 
         Ok(invitation)
     }
