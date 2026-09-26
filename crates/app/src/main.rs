@@ -29,6 +29,7 @@ use crate::features::connections::pool::SchemaCache;
 use crate::features::connections::repository::PgConnectionRepo;
 use crate::features::connections::use_cases::ConnectionUseCases;
 use crate::features::connections::vault::Vault;
+use crate::features::organization::repository::OrgRepo;
 use crate::features::organization::repository::PgOrganizationRepo;
 use crate::features::organization::use_case::OrgUseCases;
 use crate::features::query::repository::PgQueryRepo;
@@ -88,11 +89,6 @@ async fn main() -> anyhow::Result<()> {
         30 * 24 * 60 * 60, // refresh token: 30 days
     ));
 
-    let auth = Arc::new(AuthUseCases::new(
-        Arc::clone(&auth_repo),
-        Arc::clone(&token_service),
-    ));
-
     let oauth_providers = oauth::build_registry(&config.base_url);
 
     tracing::info!(
@@ -127,12 +123,19 @@ async fn main() -> anyhow::Result<()> {
     let workspace_repo = Arc::new(PgWorkspaceRepo::new(db.clone()));
     let workspaces = Arc::new(WorkspaceUseCases::new(workspace_repo));
 
-    let org_repo = Arc::new(PgOrganizationRepo::new(db.clone()));
-    let org = Arc::new(OrgUseCases::new(org_repo));
+    let org_repo: Arc<dyn OrgRepo> = Arc::new(PgOrganizationRepo::new(db.clone()));
+    let org = Arc::new(OrgUseCases::new(org_repo.clone()));
 
     let email_service = Arc::new(EmailService::new(config.email.clone())?);
 
     let outbox = OutboxPublisher::new(db.clone());
+
+    let auth = Arc::new(AuthUseCases::new(
+        Arc::clone(&auth_repo),
+        Arc::clone(&token_service),
+        org_repo,
+        Arc::clone(&workspaces),
+    ));
 
     let state = Arc::new(AppState {
         db: db.clone(),
